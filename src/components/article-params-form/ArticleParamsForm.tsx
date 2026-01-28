@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import clsx from 'clsx';
 
 import {
 	defaultArticleState,
@@ -8,7 +9,7 @@ import {
 	fontColors,
 	backgroundColors,
 	contentWidthArr,
-	fontSizeOptions
+	fontSizeOptions,
 } from '../../constants/articleProps';
 
 import { ArrowButton } from 'src/ui/arrow-button';
@@ -26,7 +27,10 @@ type ArticleParamsFormProps = {
 	onReset?: () => void;
 };
 
-export const ArticleParamsForm = ({ onApply, onReset}: ArticleParamsFormProps) => {
+export const ArticleParamsForm = ({
+	onApply,
+	onReset,
+}: ArticleParamsFormProps) => {
 	// состояние открытия/закрытия сайдбара
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -61,43 +65,86 @@ export const ArticleParamsForm = ({ onApply, onReset}: ArticleParamsFormProps) =
 	};
 
 	//обработчик применения настроек полей формы
-	const handleApply = () => {
+	const handleApply = (e?: React.FormEvent) => {
+		e?.preventDefault();
 		onApply?.(formState);
 	};
 
 	//обработчик сброса настроек полей формы
-	const handleReset = () => {
+	const handleReset = (e?: React.FormEvent) => {
+		e?.preventDefault();
 		setFormState(defaultArticleState);
 		onReset?.();
 	};
-	// не забыть удалить!!!
-	const isOpenForDevelopment = isOpen;
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpenForDevelopment} onClick={handleArrowClick} />
-			{isOpenForDevelopment && (
-				<div ref={sidebarRef}>
-					<aside className={`${styles.container} ${styles.container_open}`}>
-						<form className={styles.form}>
-							<div className={styles.bottomContainer}>
-								<Button
-									title='Сбросить'
-									htmlType='reset'
-									type='clear'
-									onClick={handleReset}
-								/>
-								<Button
-									title='Применить'
-									htmlType='submit'
-									type='apply'
-									onClick={handleApply}
-								/>
-							</div>
-						</form>
-					</aside>
-				</div>
-			)}
+			<ArrowButton isOpen={isOpen} onClick={handleArrowClick} />
+			<aside
+				ref={sidebarRef}
+				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				<form
+					className={styles.form}
+					onSubmit={handleApply}
+					onReset={handleReset}>
+					<Text size={31} weight={800}>
+						ЗАДАЙТЕ ПАРАМЕТРЫ
+					</Text>
+
+					<Select
+						title='Шрифт'
+						options={fontFamilyOptions}
+						selected={formState.fontFamilyOption}
+						onChange={(option) => handleChange('fontFamilyOption', option)}
+					/>
+
+					<RadioGroup
+						title='Размер шрифта'
+						name='font-size'
+						options={fontSizeOptions}
+						selected={formState.fontSizeOption}
+						onChange={(option) => handleChange('fontSizeOption', option)}
+					/>
+
+					<Select
+						title='Цвет шрифта'
+						options={fontColors}
+						selected={formState.fontColor}
+						onChange={(option) => handleChange('fontColor', option)}
+					/>
+
+					<Separator />
+
+					<Select
+						title='Цвет фона'
+						options={backgroundColors}
+						selected={formState.backgroundColor}
+						onChange={(option) => handleChange('backgroundColor', option)}
+					/>
+
+					<Select
+						title='Ширина контента'
+						options={contentWidthArr}
+						selected={formState.contentWidth}
+						onChange={(option) => handleChange('contentWidth', option)}
+					/>
+
+					<div className={styles.bottomContainer}>
+						<Button
+							title='Сбросить'
+							htmlType='reset'
+							type='clear'
+							onClick={handleReset}
+						/>
+						<Button
+							title='Применить'
+							htmlType='submit'
+							type='apply'
+							onClick={handleApply}
+						/>
+					</div>
+				</form>
+			</aside>
 		</>
 	);
 };
