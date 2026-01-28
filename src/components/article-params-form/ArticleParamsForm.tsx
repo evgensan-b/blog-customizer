@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import {
 	defaultArticleState,
@@ -19,6 +19,7 @@ import { Separator } from 'src/ui/separator';
 import { Text } from 'src/ui/text';
 
 import styles from './ArticleParamsForm.module.scss';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
 	onApply?: (params: ArticleStateType) => void;
@@ -26,11 +27,22 @@ type ArticleParamsFormProps = {
 };
 
 export const ArticleParamsForm = ({ onApply, onReset}: ArticleParamsFormProps) => {
-	//состояние открытия/закрытия сайдбара
+	// состояние открытия/закрытия сайдбара
 	const [isOpen, setIsOpen] = useState(false);
+
+	// Ref для сайдбара, чтобы отслеживать клики вне его
+	const sidebarRef = useRef<HTMLDivElement>(null);
 
 	// состояние формы (текущие значения)
 	const [formState, setFormState] = useState(defaultArticleState);
+
+	// Используем готовый хук для закрытия вне клика сайдбара
+	useOutsideClickClose({
+		isOpen,
+		rootRef: sidebarRef,
+		onClose: () => setIsOpen(false),
+		onChange: setIsOpen,
+	});
 
 	// обработчик открытия/закрытия сайдбара
 	const handleArrowClick = () => {
@@ -59,30 +71,32 @@ export const ArticleParamsForm = ({ onApply, onReset}: ArticleParamsFormProps) =
 		onReset?.();
 	};
 	// не забыть удалить!!!
-	const isOpenForDevelopment = true;
+	const isOpenForDevelopment = isOpen;
 
 	return (
 		<>
 			<ArrowButton isOpen={isOpenForDevelopment} onClick={handleArrowClick} />
 			{isOpenForDevelopment && (
-				<aside className={`${styles.container} ${styles.container_open}`}>
-					<form className={styles.form}>
-						<div className={styles.bottomContainer}>
-							<Button
-								title='Сбросить'
-								htmlType='reset'
-								type='clear'
-								onClick={handleReset}
-							/>
-							<Button
-								title='Применить'
-								htmlType='submit'
-								type='apply'
-								onClick={handleApply}
-							/>
-						</div>
-					</form>
-				</aside>
+				<div ref={sidebarRef}>
+					<aside className={`${styles.container} ${styles.container_open}`}>
+						<form className={styles.form}>
+							<div className={styles.bottomContainer}>
+								<Button
+									title='Сбросить'
+									htmlType='reset'
+									type='clear'
+									onClick={handleReset}
+								/>
+								<Button
+									title='Применить'
+									htmlType='submit'
+									type='apply'
+									onClick={handleApply}
+								/>
+							</div>
+						</form>
+					</aside>
+				</div>
 			)}
 		</>
 	);
