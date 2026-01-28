@@ -23,13 +23,13 @@ import styles from './ArticleParamsForm.module.scss';
 import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
-	onApply?: (params: ArticleStateType) => void;
-	onReset?: () => void;
+	setArticleParams: (params: ArticleStateType) => void;
+	articleParams: ArticleStateType;
 };
 
 export const ArticleParamsForm = ({
-	onApply,
-	onReset,
+	setArticleParams,
+	articleParams,
 }: ArticleParamsFormProps) => {
 	// состояние открытия/закрытия сайдбара
 	const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +38,7 @@ export const ArticleParamsForm = ({
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
 	// состояние формы (текущие значения)
-	const [formState, setFormState] = useState(defaultArticleState);
+	const [formState, setFormState] = useState<ArticleStateType>(articleParams);
 
 	// Используем готовый хук для закрытия вне клика сайдбара
 	useOutsideClickClose({
@@ -65,16 +65,16 @@ export const ArticleParamsForm = ({
 	};
 
 	//обработчик применения настроек полей формы
-	const handleApply = (e?: React.FormEvent) => {
-		e?.preventDefault();
-		onApply?.(formState);
+	const handleApply = (e: React.FormEvent) => {
+		e.preventDefault();
+		setArticleParams(formState);
 	};
 
 	//обработчик сброса настроек полей формы
-	const handleReset = (e?: React.FormEvent) => {
-		e?.preventDefault();
+	const handleReset = (e: React.FormEvent) => {
+		e.preventDefault();
 		setFormState(defaultArticleState);
-		onReset?.();
+		setArticleParams(defaultArticleState);
 	};
 
 	return (
@@ -130,18 +130,8 @@ export const ArticleParamsForm = ({
 					/>
 
 					<div className={styles.bottomContainer}>
-						<Button
-							title='Сбросить'
-							htmlType='reset'
-							type='clear'
-							onClick={handleReset}
-						/>
-						<Button
-							title='Применить'
-							htmlType='submit'
-							type='apply'
-							onClick={handleApply}
-						/>
+						<Button title='Сбросить' htmlType='reset' type='clear' />
+						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
 			</aside>
